@@ -865,7 +865,7 @@ end
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "Gaming's Script Hub (BETA Features)", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest", IntroText = "TEST SCRIPT"})
+local Window = OrionLib:MakeWindow({Name = "Gaming's Script Hub (BETA Features)", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest", IntroText = "Bss Test Script"})
 
 local Tab = Window:MakeTab({
 	Name = "Webhook",
@@ -1121,20 +1121,6 @@ kometa.planterssettings[3].safepuffs = State
 })
 
 
-local Tab = Window:MakeTab({
-	Name = "Others",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-
-Tab:AddToggle({
-	Name = "Farm Tickets",
-	Default = false,
-	Callback = function(State)
-kometa.toggles.farmtickets = State
-	end    
-})
 
 
 
