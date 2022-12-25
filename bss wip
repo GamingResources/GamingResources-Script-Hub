@@ -1,3 +1,4 @@
+
 local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/api.lua"))()
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/ui/finity.lua"))()
 local bssapi = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/bssapi.lua"))()
@@ -862,173 +863,303 @@ end
 
 
 
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
+local Window = OrionLib:MakeWindow({Name = "Gaming's Script Hub (BETA Features)", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest", IntroText = "TEST SCRIPT"})
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-local Window = Rayfield:CreateWindow({
-   Name = "Gaming's Script Hub (BETA)",
-   LoadingTitle = "Bee Swarm Simulator",
-   LoadingSubtitle = "By GamingResources",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "Big Hu2222b"
-   },
-   Discord = {
-      Enabled = false,
-      Invite = "sirius", -- The Discord invite code, do not include discord.gg/
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
-   },
-   KeySystem = false, -- Set this to true to use our key system
-   KeySettings = {
-      Title = "Sirius Hub",
-      Subtitle = "Key System",
-      Note = "Join the discord (discord.gg/sirius)",
-      FileName = "SiriusKey",
-      SaveKey = true,
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = "Hello"
-   }
+local Tab = Window:MakeTab({
+	Name = "Webhook",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
 })
 
-
-local Tab = Window:CreateTab("Discord Webhook", 4483362458) 
-
-
-local Input = Tab:CreateInput({
-   Name = "Webhook Link",
-   Info = "Imput Webhook Link Here", -- Speaks for itself, Remove if none.
-   PlaceholderText = "API",
-   NumbersOnly = false, -- If the user can only type numbers.
-   CharacterLimit = 15000000, --max character limit. Remove if none.
-   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Value)
+Tab:AddTextbox({
+	Name = "Webhook",
+	Default = "",
+	TextDisappear = true,
+	Callback = function(Value)
 temptable.webhook = Value
-   -- The variable (Text) is a string for the value in the text box
-   end,
+	end	  
 })
 
+Tab:AddButton({
+	Name = "Test Webhook",
+	Callback = function()
+api.notify('Webhook Test', 'Your webhook is '..temptable.webhook)
+  	end    
+})
+Tab:AddLabel("Main Settings")
 
-
-local Button = Tab:CreateButton({
-   Name = "Test Webhook",
-   Info = "Use It To Test If The Webhook Is Working", -- Speaks for itself, Remove if none.
-   Interact = 'Test',
-   Callback = function()
- api.notify('Gaming's Script Hub', 'Your webhook is '..temptable.webhook)
-   end,
+Tab:AddToggle({
+	Name = "Send Webhook Every Minute",
+	Default = false,
+	Callback = function(State)
+_G.Condition = State -- true turns it on, false turns it off
+while _G.Condition == true do
+-- Script Here
+api.imagehook(temptable.webhook, "Total Honey: `"..game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text.."`\nGained Honey: `"..api.suffixstring(temptable.honeycurrent - temptable.honeystart).."`\nElapsed Time: `"..api.toHMS(temptable.stats.runningfor).."`", "Gamings Script Hub", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru")
+wait(60)
+end
+	end    
 })
 
-
-
-local Toggle = Tab:CreateToggle({
-   Name = "Send After Converting",
-   Info = "Sends Stats After Converting", -- Speaks for itself, Remove if none.
-   CurrentValue = false,
-   Flag = "Toggle1deededeed", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(State)
- kometa.webhooking.convert = State
-   -- The variable (Value) is a boolean on whether the toggle is true or false
-   end,
+Tab:AddToggle({
+	Name = "Send Webhook Every 10 Minutes",
+	Default = false,
+	Callback = function(State)
+_G.Condition = State -- true turns it on, false turns it off
+while _G.Condition == true do
+-- Script Here
+api.imagehook(temptable.webhook, "Total Honey: `"..game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text.."`\nGained Honey: `"..api.suffixstring(temptable.honeycurrent - temptable.honeystart).."`\nElapsed Time: `"..api.toHMS(temptable.stats.runningfor).."`", "Gamings Script Hub", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru")
+wait(600)
+end
+	end    
 })
 
+Tab:AddToggle({
+	Name = "Send Webhook Every Hour",
+	Default = false,
+	Callback = function(State)
+_G.Condition = State -- true turns it on, false turns it off
+while _G.Condition == true do
+-- Script Here
+api.imagehook(temptable.webhook, "Total Honey: `"..game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text.."`\nGained Honey: `"..api.suffixstring(temptable.honeycurrent - temptable.honeystart).."`\nElapsed Time: `"..api.toHMS(temptable.stats.runningfor).."`", "Gamings Script Hub", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru")
+wait(3600)
+end
+	end    
+})
+Tab:AddLabel("Misc Settings")
 
-local Toggle = Tab:CreateToggle({
-   Name = "Send On Vicious",
-   Info = "Sends When Player Finds Vicious Bee.", -- Speaks for itself, Remove if none.
-   CurrentValue = false,
-   Flag = "Toggle1g6g6g6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(State)
-   -- The function that takes place when the toggle is pressed
+Tab:AddToggle({
+	Name = "Send On Vicious",
+	Default = false,
+	Callback = function(State)
 kometa.webhooking.vicious = State
-end,
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Send On Windy",
+	Default = false,
+	Callback = function(State)
+kometa.webhooking.windy = State
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Send On Player Join",
+	Default = false,
+	Callback = function(State)
+kometa.webhooking.playeradded = State
+	end    
 })
 
 
-local Toggle = Tab:CreateToggle({
-   Name = "Send On Windy",
-   Info = "Sends When Player Finds Windy Bee.", -- Speaks for itself, Remove if none.
-   CurrentValue = false,
-   Flag = "Toggwindyle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(State)
-kometa.webhooking.windy = State   -- The variable (Value) is a boolean on whether the toggle is true or false
-   end,
+local Tab = Window:MakeTab({
+	Name = "Custom Planters",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+	Name = "First Planter"
+})
+
+Tab:AddDropdown({
+	Name = "Planter",
+	Default = "Choose Planter",
+	Options = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER,
+	Callback = function(Option)
+kometa.planterssettings[1].Type = Option
+	end    
 })
 
 
-local Toggle = Tab:CreateToggle({
-   Name = "Send On Player Join",
-   Info = "Sends When A Player Joins The Server.", -- Speaks for itself, Remove if none.
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(State)
-kometa.webhooking.playeradded = State   -- The variable (Value) is a boolean on whether the toggle is true or false
-   end,
+Tab:AddDropdown({
+	Name = "Field",
+	Default = "Choose Field",
+	Options = fieldstable,
+	Callback = function(Option)
+kometa.planterssettings[1].field = Option
+	end    
+})
+
+Tab:AddSlider({
+	Name = "Growth Percent",
+	Min = 0,
+	Max = 100,
+	Default = 100,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 1,
+	ValueName = "%",
+	Callback = function(Value)
+kometa.planterssettings[1].growth = tonumber(Value)/100 or 1
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Auto Plant",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[1].enabled = State
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Ignore If Puffshrooms",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[1].safepuffs = State
+	end    
 })
 
 
-local Toggle = Tab:CreateToggle({
-   Name = "Send On Connection Lost",
-   Info = "Sends When You Get Kicked From Th Game.", -- Speaks for itself, Remove if none.
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(State)
-kometa.webhooking.connectionlost = State   -- The variable (Value) is a boolean on whether the toggle is true or false
-   end,
+
+local Section = Tab:AddSection({
+	Name = "Second Planter"
+})
+
+Tab:AddDropdown({
+	Name = "Planter",
+	Default = "Choose Planter",
+	Options = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER,
+	Callback = function(Option)
+kometa.planterssettings[2].Type = Option
+	end    
 })
 
 
-local Tab = Window:CreateTab("Custom Planters", 4483362458) 
+Tab:AddDropdown({
+	Name = "Field",
+	Default = "Choose Field",
+	Options = fieldstable,
+	Callback = function(Option)
+kometa.planterssettings[2].field = Option
+	end    
+})
+
+Tab:AddSlider({
+	Name = "Growth Percent",
+	Min = 0,
+	Max = 100,
+	Default = 100,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 1,
+	ValueName = "%",
+	Callback = function(Value)
+kometa.planterssettings[2].growth = tonumber(Value)/100 or 1
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Auto Plant",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[2].enabled = State
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Ignore If Puffshrooms",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[2].safepuffs = State
+	end    
+})
+
+
+local Section = Tab:AddSection({
+	Name = "Third Planter"
+})
+
+Tab:AddDropdown({
+	Name = "Planter",
+	Default = "Choose Planter",
+	Options = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER,
+	Callback = function(Option)
+kometa.planterssettings[3].Type = Option
+	end    
+})
+
+
+Tab:AddDropdown({
+	Name = "Field",
+	Default = "Choose Field",
+	Options = fieldstable,
+	Callback = function(Option)
+kometa.planterssettings[3].field = Option
+	end    
+})
+
+Tab:AddSlider({
+	Name = "Growth Percent",
+	Min = 0,
+	Max = 100,
+	Default = 100,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 1,
+	ValueName = "%",
+	Callback = function(Value)
+kometa.planterssettings[3].growth = tonumber(Value)/100 or 1
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Auto Plant",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[3].enabled = State
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Ignore If Puffshrooms",
+	Default = false,
+	Callback = function(State)
+kometa.planterssettings[3].safepuffs = State
+	end    
+})
+
+
+local Tab = Window:MakeTab({
+	Name = "Others",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+
+Tab:AddToggle({
+	Name = "Farm Tickets",
+	Default = false,
+	Callback = function(State)
+kometa.toggles.farmtickets = State
+	end    
+})
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OrionLib:Init()
 
 
 
@@ -1411,7 +1542,7 @@ end)
 Workspace.Particles.ChildAdded:Connect(function(instance)
     if string.find(instance.Name, "Vicious") then
         temptable.detected.vicious = true
-        if kometa.webhooking.vicious then api.imagehook(temptable.webhook, "Vicious Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/1f/Vicious_Bee.png/revision/latest/scale-to-width-down/350?cb=20181130115012&path-prefix=ru") end
+        if kometa.webhooking.vicious then api.imagehook(temptable.webhook, "Vicious Bee detected!", "Gamings Script Hub", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/1f/Vicious_Bee.png/revision/latest/scale-to-width-down/350?cb=20181130115012&path-prefix=ru") end
     end
 end)
 Workspace.Particles.ChildRemoved:Connect(function(instance)
@@ -1422,7 +1553,7 @@ end)
 game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
     if v.Name == "Windy" then
         task.wait(3) temptable.windy = v temptable.detected.windy = true
-        if kometa.webhooking.windy then api.imagehook(temptable.webhook, "Windy Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/8/85/Windy_Bee.png/revision/latest?cb=20200404000105") end
+        if kometa.webhooking.windy then api.imagehook(temptable.webhook, "Windy Bee detected!", "Gamings Script Hub", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/8/85/Windy_Bee.png/revision/latest?cb=20200404000105") end
     end
 end)
 game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
@@ -1560,7 +1691,7 @@ task.spawn(function()while task.wait() do
 end end)
 
 game.Players.PlayerAdded:Connect(function(player)
-    if kometa.webhooking.playeradded then api.imagehook(temptable.webhook, player.Name.." joined your server", "kometa ☄️", "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png") end
+    if kometa.webhooking.playeradded then api.imagehook(temptable.webhook, player.Name.." joined your server", "Gamings Script Hub", "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png") end
 end)
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
