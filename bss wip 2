@@ -1,0 +1,2328 @@
+-- API CALLS
+local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/max0mind/lua/main/API/andromeda_api.lua"))()
+local library = api.returncode("https://raw.githubusercontent.com/max0mind/lua/main/API/bracketv3.lua")
+local bssapi = api.returncode("https://raw.githubusercontent.com/max0mind/lua/main/BSS/bssapi.lua")
+
+
+
+
+-- Script temporary variables
+local playerstatsevent = game:GetService("ReplicatedStorage").Events.RetrievePlayerStats
+local statstable = playerstatsevent:InvokeServer()
+local monsterspawners = game:GetService("Workspace").MonsterSpawners
+local rarename
+function rtsg() tab = game.ReplicatedStorage.Events.RetrievePlayerStats:InvokeServer() return tab end
+function maskequip(mask) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = mask, ["Category"] = "Accessory"} game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end
+local lasttouched = nil
+local done = true
+local hi = false
+
+-- Script tables
+
+local temptable = {
+    version = "1.0.0",
+    blackfield = "Ant Field",
+    redfields = {},
+    bluefields = {},
+    whitefields = {},
+    shouldiconvertballoonnow = false,
+    balloondetected = false,
+    puffshroomdetected = false,
+    magnitude = 70,
+    blacklist = {
+        "e_mrFluk2281"
+    },
+    running = false,
+    configname = "",
+    tokenpath = game:GetService("Workspace").Collectibles,
+    started = {
+        vicious = false,
+        mondo = false,
+        windy = false,
+        ant = false,
+        monsters = false
+    },
+    detected = {
+        vicious = false,
+        windy = false
+    },
+    tokensfarm = false,
+    converting = false,
+    honeystart = 0,
+    grib = nil,
+    gribpos = CFrame.new(0,0,0),
+    honeycurrent = statstable.Totals.Honey,
+    dead = false,
+    float = false,
+    pepsigodmode = false,
+    pepsiautodig = false,
+    alpha = false,
+    beta = false,
+    myhiveis = false,
+    invis = false,
+    windy = nil,
+    sprouts = {
+        detected = false,
+        coords
+    },
+    cache = {
+        autofarm = false,
+        killmondo = false,
+        vicious = false,
+        windy = false
+    },
+    allplanters = {},
+    planters = {
+        planter = {},
+        cframe = {},
+        activeplanters = {
+            type = {},
+            id = {}
+        }
+    },
+    monstertypes = {"Ladybug", "Rhino", "Spider", "Scorpion", "Mantis", "Werewolf"},
+    ["stopapypa"] = function(path, part)
+        local Closest
+        for i,v in next, path:GetChildren() do
+            if v.Name ~= "PlanterBulb" then
+                if Closest == nil then
+                    Closest = v.Soil
+                else
+                    if (part.Position - v.Soil.Position).magnitude < (Closest.Position - part.Position).magnitude then
+                        Closest = v.Soil
+                    end
+                end
+            end
+        end
+        return Closest
+    end,
+    coconuts = {},
+    crosshairs = {},
+    crosshair = false,
+    coconut = false,
+    act = 0,
+    ['touchedfunction'] = function(v)
+        if lasttouched ~= v then
+            if v.Parent.Name == "FlowerZones" then
+                if v:FindFirstChild("ColorGroup") then
+                    if tostring(v.ColorGroup.Value) == "Red" then
+                        maskequip("Demon Mask")
+                    elseif tostring(v.ColorGroup.Value) == "Blue" then
+                        maskequip("Diamond Mask")
+                    end
+                else
+                    maskequip("Gummy Mask")
+                end
+                lasttouched = v
+            end
+        end
+    end,
+    runningfor = 0,
+    oldtool = rtsg()["EquippedCollector"],
+    ['gacf'] = function(part, st)
+        coordd = CFrame.new(part.Position.X, part.Position.Y+st, part.Position.Z)
+        return coordd
+    end
+}
+local planterst = {
+    plantername = {},
+    planterid = {}
+}
+
+for i,v in next, temptable.blacklist do if v == api.nickname then game.Players.LocalPlayer:Kick("You're blacklisted! Get clapped!") end end
+if temptable.honeystart == 0 then temptable.honeystart = statstable.Totals.Honey end
+
+
+for i,v in next, game:GetService("Workspace").MonsterSpawners:GetDescendants() do if v.Name == "TimerAttachment" then v.Name = "Attachment" end end
+for i,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do if v.Name == "RoseBush" then v.Name = "ScorpionBush" elseif v.Name == "RoseBush2" then v.Name = "ScorpionBush2" end end
+for i,v in next, game:GetService("Workspace").FlowerZones:GetChildren() do if v:FindFirstChild("ColorGroup") then if v:FindFirstChild("ColorGroup").Value == "Red" then table.insert(temptable.redfields, v.Name) elseif v:FindFirstChild("ColorGroup").Value == "Blue" then table.insert(temptable.bluefields, v.Name) end else table.insert(temptable.whitefields, v.Name) end end
+local flowertable = {}
+for _,z in next, game:GetService("Workspace").Flowers:GetChildren() do table.insert(flowertable, z.Position) end
+local masktable = {}
+for _,v in next, game:GetService("ReplicatedStorage").Accessories:GetChildren() do if string.match(v.Name, "Mask") then table.insert(masktable, v.Name) end end
+local collectorstable = {}
+for _,v in next, getupvalues(require(game:GetService("ReplicatedStorage").Collectors).Exists) do for e,r in next, v do table.insert(collectorstable, e) end end
+local fieldstable = {}
+for _,v in next, game:GetService("Workspace").FlowerZones:GetChildren() do table.insert(fieldstable, v.Name) end
+local toystable = {}
+for _,v in next, game:GetService("Workspace").Toys:GetChildren() do table.insert(toystable, v.Name) end
+local spawnerstable = {}
+for _,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do table.insert(spawnerstable, v.Name) end
+local accesoriestable = {}
+for _,v in next, game:GetService("ReplicatedStorage").Accessories:GetChildren() do if v.Name ~= "UpdateMeter" then table.insert(accesoriestable, v.Name) end end
+for i,v in pairs(getupvalues(require(game:GetService("ReplicatedStorage").PlanterTypes).GetTypes)) do for e,z in pairs(v) do table.insert(temptable.allplanters, e) end end
+table.sort(fieldstable)
+table.sort(accesoriestable)
+table.sort(toystable)
+table.sort(spawnerstable)
+table.sort(masktable)
+table.sort(temptable.allplanters)
+table.sort(collectorstable)
+
+-- float pad
+
+local floatpad = Instance.new("Part", game:GetService("Workspace"))
+floatpad.CanCollide = false
+floatpad.Anchored = true
+floatpad.Transparency = 1
+floatpad.Name = "FloatPad"
+
+-- cococrab
+
+local cocopad = Instance.new("Part", game:GetService("Workspace"))
+cocopad.Name = "Coconut Part"
+cocopad.Anchored = true
+cocopad.Transparency = 1
+cocopad.Size = Vector3.new(10, 1, 10)
+cocopad.Position = Vector3.new(-307.52117919922, 105.91863250732, 467.86791992188)
+
+-- antfarm
+
+local antpart = Instance.new("Part", workspace)
+antpart.Name = "Ant Autofarm Part"
+antpart.Position = Vector3.new(96, 47, 553)
+antpart.Anchored = true
+antpart.Size = Vector3.new(128, 1, 50)
+antpart.Transparency = 1
+antpart.CanCollide = false
+
+-- config
+
+local andromeda = {
+    rares = {},
+    priority = {},
+    bestfields = {
+        red = "Pepper Patch",
+        white = "Coconut Field",
+        blue = "Stump Field"
+    },
+    blacklistedfields = {},
+    killerandromeda = {},
+    toggles = {
+        autofarm = false,
+        farmclosestleaf = false,
+        farmbubbles = false,
+        autodig = false,
+        farmrares = false,
+        rgbui = false,
+        farmflower = false,
+        farmfuzzy = false,
+        farmcoco = false,
+        farmflame = false,
+        farmclouds = false,
+        killmondo = false,
+        killvicious = false,
+        loopspeed = false,
+        loopjump = false,
+        autoquest = false,
+        autoboosters = false,
+        autodispense = false,
+        clock = false,
+        freeantpass = false,
+        honeystorm = false,
+        autodoquest = false,
+        disableseperators = false,
+        npctoggle = false,
+        loopfarmspeed = false,
+        mobquests = false,
+        traincrab = false,
+        avoidmobs = false,
+        farmsprouts = false,
+        farmunderballoons = false,
+        farmsnowflakes = false,
+        collectgingerbreads = false,
+        collectcrosshairs = false,
+        farmpuffshrooms = false,
+        tptonpc = false,
+        donotfarmtokens = false,
+        convertballoons = false,
+        autostockings = false,
+        autosamovar = false,
+        autoonettart = false,
+        autocandles = false,
+        autofeast = false,
+        autoplanters = false,
+        autokillmobs = false,
+        autoant = false,
+        killwindy = false,
+        godmode = false
+    },
+    vars = {
+        field = "Ant Field",
+        convertat = 100,
+        farmspeed = 60,
+        prefer = "Tokens",
+        walkspeed = 70,
+        jumppower = 70,
+        npcprefer = "All Quests",
+        farmtype = "Walk",
+        monstertimer = 3
+    },
+    dispensesettings = {
+        blub = false,
+        straw = false,
+        treat = false,
+        coconut = false,
+        glue = false,
+        rj = false,
+        white = false,
+        red = false,
+        blue = false
+    }
+}
+
+local defaultandromeda = andromeda
+
+-- functions
+
+function statsget() local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() return stats end
+function farm(trying)
+    if andromeda.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = andromeda.vars.farmspeed end
+    api.humanoid():MoveTo(trying.Position) 
+    repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <=4 or not IsToken(trying) or not temptable.running
+end
+
+function disableall()
+    if andromeda.toggles.autofarm and not temptable.converting then
+        temptable.cache.autofarm = true
+        andromeda.toggles.autofarm = false
+    end
+    if andromeda.toggles.killmondo and not temptable.started.mondo then
+        andromeda.toggles.killmondo = false
+        temptable.cache.killmondo = true
+    end
+    if andromeda.toggles.killvicious and not temptable.started.vicious then
+        andromeda.toggles.killvicious = false
+        temptable.cache.vicious = true
+    end
+    if andromeda.toggles.killwindy and not temptable.started.windy then
+        andromeda.toggles.killwindy = false
+        temptable.cache.windy = true
+    end
+end
+
+function enableall()
+    if temptable.cache.autofarm then
+        andromeda.toggles.autofarm = true
+        temptable.cache.autofarm = false
+    end
+    if temptable.cache.killmondo then
+        andromeda.toggles.killmondo = true
+        temptable.cache.killmondo = false
+    end
+    if temptable.cache.vicious then
+        andromeda.toggles.killvicious = true
+        temptable.cache.vicious = false
+    end
+    if temptable.cache.windy then
+        andromeda.toggles.killwindy = true
+        temptable.cache.windy = false
+    end
+end
+
+function gettoken(v3)
+    if not v3 then
+        v3 = fieldposition
+    end
+    task.wait()
+    for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
+        if tonumber((r.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.4 and (v3-r.Position).magnitude <= temptable.magnitude then
+            farm(r)
+        end
+    end
+end
+
+function makesprinklers()
+    sprinkler = rtsg().EquippedSprinkler
+    e = 1
+    if sprinkler == "Basic Sprinkler" or sprinkler == "The Supreme Saturator" then
+        e = 1
+    elseif sprinkler == "Silver Soakers" then
+        e = 2
+    elseif sprinkler == "Golden Gushers" then
+        e = 3
+    elseif sprinkler == "Diamond Drenchers" then
+        e = 4
+    end
+    for i = 1, e do
+        k = api.humanoid().JumpPower
+        if e ~= 1 then api.humanoid().JumpPower = 70 api.humanoid().Jump = true task.wait(.2) end
+        game.ReplicatedStorage.Events.PlayerActivesCommand:FireServer({["Name"] = "Sprinkler Builder"})
+        if e ~= 1 then api.humanoid().JumpPower = k task.wait(1) end
+    end
+end
+
+function killmobs()
+    for i,v in pairs(game:GetService("Workspace").MonsterSpawners:GetChildren()) do
+        if v:FindFirstChild("Territory") then
+            if v.Name ~= "Commando Chick" and v.Name ~= "CoconutCrab" and v.Name ~= "StumpSnail" and v.Name ~= "TunnelBear" and v.Name ~= "King Beetle Cave" and not v.Name:match("CaveMonster") and not v:FindFirstChild("TimerLabel", true).Visible then
+                if v.Name:match("Werewolf") then
+                    monsterpart = game:GetService("Workspace").Territories.WerewolfPlateau.w
+                elseif v.Name:match("Mushroom") then
+                    monsterpart = game:GetService("Workspace").Territories.MushroomZone.Part
+                else
+                    monsterpart = v.Territory.Value
+                end
+                api.humanoidrootpart().CFrame = monsterpart.CFrame
+                repeat api.humanoidrootpart().CFrame = monsterpart.CFrame avoidmob() task.wait(1) until v:FindFirstChild("TimerLabel", true).Visible
+                for i = 1, 4 do gettoken(monsterpart.Position) end
+            end
+        end
+    end
+end
+
+function IsToken(token)
+    if not token then
+        return false
+    end
+    if not token.Parent then return false end
+    if token then
+        if token.Orientation.Z ~= 0 then
+            return false
+        end
+        if token:FindFirstChild("FrontDecal") then
+        else
+            return false
+        end
+        if not token.Name == "C" then
+            return false
+        end
+        if not token:IsA("Part") then
+            return false
+        end
+        return true
+    else
+        return false
+    end
+end
+
+function check(ok)
+    if not ok then
+        return false
+    end
+    if not ok.Parent then return false end
+    return true
+end
+
+function getplanters()
+    table.clear(planterst.plantername)
+    table.clear(planterst.planterid)
+    for i,v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do 
+        if v.GrowthPercent == 1 and v.IsMine then
+            table.insert(planterst.plantername, v.Type)
+            table.insert(planterst.planterid, v.ActorID)
+        end
+    end
+end
+
+function farmant()
+    antpart.CanCollide = true
+    temptable.started.ant = true
+    anttable = {left = true, right = false}
+    temptable.oldtool = rtsg()['EquippedCollector']
+    game.ReplicatedStorage.Events.ItemPackageEvent:InvokeServer("Equip",{["Mute"] = true,["Type"] = "Spark Staff",["Category"] = "Collector"})
+    game.ReplicatedStorage.Events.ToyEvent:FireServer("Ant Challenge")
+    andromeda.toggles.autodig = true
+    acl = CFrame.new(127, 48, 547)
+    acr = CFrame.new(65, 48, 534)
+    task.wait(1)
+    game.ReplicatedStorage.Events.PlayerActivesCommand:FireServer({["Name"] = "Sprinkler Builder"})
+    api.humanoidrootpart().CFrame = api.humanoidrootpart().CFrame + Vector3.new(0, 15, 0)
+    task.wait(3)
+    repeat
+        task.wait()
+        for i,v in next, game.Workspace.Toys["Ant Challenge"].Obstacles:GetChildren() do
+            if v:FindFirstChild("Root") then
+                if (v.Root.Position-api.humanoidrootpart().Position).magnitude <= 40 and anttable.left then
+                    api.humanoidrootpart().CFrame = acr
+                    anttable.left = false anttable.right = true
+                    wait(.1)
+                elseif (v.Root.Position-api.humanoidrootpart().Position).magnitude <= 40 and anttable.right then
+                    api.humanoidrootpart().CFrame = acl
+                    anttable.left = true anttable.right = false
+                    wait(.1)
+                end
+            end
+        end
+    until game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value == false
+    task.wait(1)
+    game.ReplicatedStorage.Events.ItemPackageEvent:InvokeServer("Equip",{["Mute"] = true,["Type"] = temptable.oldtool,["Category"] = "Collector"})
+    temptable.started.ant = false
+    antpart.CanCollide = false
+end
+
+function collectplanters()
+    getplanters()
+    for i,v in pairs(planterst.plantername) do
+        if api.partwithnamepart(v, game:GetService("Workspace").Planters) and api.partwithnamepart(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
+            soil = api.partwithnamepart(v, game:GetService("Workspace").Planters).Soil
+            api.humanoidrootpart().CFrame = soil.CFrame
+            game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(planterst.planterid[i])
+            task.wait(.5)
+            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.." Planter"})
+            for i = 1, 5 do gettoken(soil.Position) end
+            task.wait(2)
+        end
+    end
+end
+
+function getprioritytokens()
+    task.wait()
+    if temptable.running == false then
+        for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
+            if r:FindFirstChildOfClass("Decal") then
+                local aaaaaaaa = string.split(r:FindFirstChildOfClass("Decal").Texture, 'rbxassetid://')[2]
+                if aaaaaaaa ~= nil and api.findvalue(andromeda.priority, aaaaaaaa) then
+                    if r.Name == game.Players.LocalPlayer.Name and not r:FindFirstChild("got it") or tonumber((r.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.4 and not r:FindFirstChild("got it") then
+                        farm(r) local val = Instance.new("IntValue",r) val.Name = "got it" break
+                    end
+                end
+            end
+        end
+    end
+end
+
+function gethiveballoon()
+    task.wait()
+    result = false
+    for i,hive in next, game:GetService("Workspace").Honeycombs:GetChildren() do
+        task.wait()
+        if hive:FindFirstChild("Owner") and hive:FindFirstChild("SpawnPos") then
+            if tostring(hive.Owner.Value) == game.Players.LocalPlayer.Name then
+                for e,balloon in next, game:GetService("Workspace").Balloons.HiveBalloons:GetChildren() do
+                    task.wait()
+                    if balloon:FindFirstChild("BalloonRoot") then
+                        if (balloon.BalloonRoot.Position-hive.SpawnPos.Value.Position).magnitude < 15 then
+                            result = true
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return result
+end
+
+function converthoney()
+    task.wait(0)
+    if temptable.converting then
+        if game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text ~= "Stop Making Honey" and game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.BackgroundColor3 ~= Color3.new(201, 39, 28) or (game:GetService("Players").LocalPlayer.SpawnPos.Value.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 10 then
+            api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
+            task.wait(.9)
+            if game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text ~= "Stop Making Honey" and game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.BackgroundColor3 ~= Color3.new(201, 39, 28) or (game:GetService("Players").LocalPlayer.SpawnPos.Value.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 10 then game:GetService("ReplicatedStorage").Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking") end
+            task.wait(.1)
+        end
+    end
+end
+
+function closestleaf()
+    for i,v in next, game.Workspace.Flowers:GetChildren() do
+        if temptable.running == false and tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+            farm(v)
+            break
+        end
+    end
+end
+
+function getbubble()
+    for i,v in next, game.workspace.Particles:GetChildren() do
+        if string.find(v.Name, "Bubble") and temptable.running == false and tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+            farm(v)
+            break
+        end
+    end
+end
+
+function getballoons()
+    for i,v in next, game:GetService("Workspace").Balloons.FieldBalloons:GetChildren() do
+        if v:FindFirstChild("BalloonRoot") and v:FindFirstChild("PlayerName") then
+            if v:FindFirstChild("PlayerName").Value == game.Players.LocalPlayer.Name then
+                if tonumber((v.BalloonRoot.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+                    api.walkTo(v.BalloonRoot.Position)
+                end
+            end
+        end
+    end
+end
+
+function getflower()
+    flowerrrr = flowertable[math.random(#flowertable)]
+    if tonumber((flowerrrr-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.4 and tonumber((flowerrrr-fieldposition).magnitude) <= temptable.magnitude/1.4 then 
+        if temptable.running == false then 
+            if andromeda.toggles.loopfarmspeed then 
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = andromeda.vars.farmspeed 
+            end 
+            api.walkTo(flowerrrr) 
+        end 
+    end
+end
+
+function getcloud()
+    for i,v in next, game:GetService("Workspace").Clouds:GetChildren() do
+        e = v:FindFirstChild("Plane")
+        if e and tonumber((e.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+            api.walkTo(e.Position)
+        end
+    end
+end
+
+function getcoco(v)
+    if temptable.coconut then repeat task.wait() until not temptable.coconut end
+    temptable.coconut = true
+    api.tween(.1, v.CFrame)
+    repeat task.wait() api.walkTo(v.Position) until not v.Parent
+    task.wait(.1)
+    temptable.coconut = false
+    table.remove(temptable.coconuts, table.find(temptable.coconuts, v))
+end
+
+function getfuzzy()
+    pcall(function()
+        for i,v in next, game.workspace.Particles:GetChildren() do
+            if v.Name == "DustBunnyInstance" and temptable.running == false and tonumber((v.Plane.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+                if v:FindFirstChild("Plane") then
+                    farm(v:FindFirstChild("Plane"))
+                    break
+                end
+            end
+        end
+    end)
+end
+
+function getflame()
+    for i,v in next, game:GetService("Workspace").PlayerFlames:GetChildren() do
+        if tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
+            farm(v)
+            break
+        end
+    end
+end
+
+function avoidmob()
+    for i,v in next, game:GetService("Workspace").Monsters:GetChildren() do
+        if v:FindFirstChild("Head") then
+            if (v.Head.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 30 and api.humanoid():GetState() ~= Enum.HumanoidStateType.Freefall then
+                game.Players.LocalPlayer.Character.Humanoid.Jump = true
+            end
+        end
+    end
+end
+
+function getcrosshairs(v)
+    if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
+    if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
+    temptable.crosshair = true
+    api.walkTo(v.Position)
+    repeat task.wait() api.walkTo(v.Position) until not v.Parent or v.BrickColor == BrickColor.new("Forest green")
+    task.wait(.1)
+    temptable.crosshair = false
+    table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
+    else
+        table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
+    end
+end
+
+function makequests()
+    for i,v in next, game:GetService("Workspace").NPCs:GetChildren() do
+        if v.Name ~= "Ant Challenge Info" and v.Name ~= "Bubble Bee Man 2" and v.Name ~= "Wind Shrine" and v.Name ~= "Gummy Bear" then if v:FindFirstChild("Platform") then if v.Platform:FindFirstChild("AlertPos") then if v.Platform.AlertPos:FindFirstChild("AlertGui") then if v.Platform.AlertPos.AlertGui:FindFirstChild("ImageLabel") then
+            image = v.Platform.AlertPos.AlertGui.ImageLabel
+            button = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.ActivateButton.MouseButton1Click
+            if image.ImageTransparency == 0 then
+                if andromeda.toggles.tptonpc then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z)
+                    task.wait(1)
+                else
+                    api.tween(2,CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z))
+                    task.wait(3)
+                end
+                for b,z in next, getconnections(button) do    z.Function()    end
+                task.wait(8)
+                if image.ImageTransparency == 0 then
+                    for b,z in next, getconnections(button) do    z.Function()    end
+                end
+                task.wait(2)
+            end
+        end     
+    end end end end end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+
+
+
+local Window = Rayfield:CreateWindow({
+   Name = "Gaming's Script Hub",
+   LoadingTitle = "Bee Swarm Simulator",
+   LoadingSubtitle = "By GamingResoures",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Gaming's bss"
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Sirius Hub",
+      Subtitle = "Key System",
+      Note = "Join the discord (discord.gg/sirius)",
+      FileName = "SiriusKey",
+      SaveKey = true,
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = "Hello"
+   }
+})
+
+local Tab = Window:CreateTab("Home", 4483362458)
+
+local Section = Tab:CreateSection("Merry Christmas "..api.nickname.. "!")
+
+local Label = Tab:CreateLabel("(!) = Exploit Specific Function")
+local Label = Tab:CreateLabel("Script version: "..temptable.version)
+local Label = Tab:CreateLabel("Place version: "..game.PlaceVersion)
+local gainedhoneylabel = Tab:CreateLabel("Gained Honey: 0")
+
+local Button = Tab:CreateButton({
+   Name = "Discord Invite (Copy To Clipboard) ",
+   Info = "https://discord.gg/6eEb9EQ2mj", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+setclipboard("https://discord.gg/6eEb9EQ2mj")
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Tokens Id Link (Copy To Clipboard)",
+   Info = "https://pastebin.com/raw/wtHBD3ij", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+setclipboard("https://pastebin.com/raw/wtHBD3ij")
+   end,
+})
+
+local Section = Tab:CreateSection("BETA")
+
+local Button = Tab:CreateButton({
+   Name = "Load Custom Planters And Webhook (BETA)",
+   Info = "Downloads Beta GUI", -- Speaks for itself, Remove if none.
+   Interact = 'Different Script',
+   Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingResources/GamingResources-Script-Hub/main/bss%20wip"))()
+
+   end,
+})
+
+
+
+
+local Tab = Window:CreateTab("Farming", 4483362458)
+
+local Section = Tab:CreateSection("Autofarm")
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Field",
+   Options = fieldstable,
+   CurrentOption = "Pick A Field",
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(String)
+  andromeda.vars.field = String
+  -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Autofarm",
+   Info = "Toggle It On To Start Autofarming!", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautofarm", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autofarm = State
+   end,
+})
+
+local Section = Tab:CreateSection("Main Autofarm Settings")
+
+
+local Slider = Tab:CreateSlider({
+   Name = "Convert at:",
+   Info = "This Determines At How Much You Want The Autofarm To Convert", -- Speaks for itself, Remove if none.
+   Range = {0, 100},
+   Increment = 1,
+   Suffix = "%",
+   CurrentValue = 100,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+ andromeda.vars.convertat = Value
+   end,
+})
+
+
+local Input = Tab:CreateInput({
+   Name = "Autofarming Walkspeed",
+   Info = "Default Value = 60", -- Speaks for itself, Remove if none.
+   PlaceholderText = "60",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 15, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+andromeda.vars.farmspeed = Value
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "^ Loop Speed On Autofarming",
+   Info = "Use The Speed Put Above While Autofarming.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglespeed", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.loopfarmspeed = State
+   end,
+})
+
+local Section = Tab:CreateSection("Misc Autofarm Settings")
+
+local Toggle = Tab:CreateToggle({
+   Name = "Dig Automatically",
+   Info = "Will Dig Using Poreclian Dipper Unless You Have A Better Tool.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggledig", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autodig = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Place Sprinklers",
+   Info = "Places Sprinklers Automatically.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautosprinkler", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autosprinkler = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Convert Hive Balloon",
+   Info = "Converts Hive Bloon When Converting", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleconvertbloon", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.convertballoons = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Bubbles",
+   Info = "Pops Bubbles Automatically.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautobubble", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmbubbles = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Flames",
+   Info = "Automatically Farms Flames.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoflames", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmflame = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Coconuts / Star Shower",
+   Info = "Automatically Teleports To Coconuts And Stars.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautocosher", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmcoco = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Precise Crosshairs",
+   Info = "Farms Precise Tokens.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautohair", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.collectcrosshairs = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Fuzzy Bombs",
+   Info = "Toggle It On To Farm Fuzzy Bombs.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "toggleautofuy", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmfuzzy = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Under Balloons",
+   Info = "Farms Pollen Under Balloons.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautobloon", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmunderballoons = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Under Clouds",
+   Info = "Farms Under Clouds For Extra Pollen.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoclouds", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmclouds = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Sprouts",
+   Info = "Farms Sprouts.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "ToggleautoSprout", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmsprouts = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Puffshrooms",
+   Info = "Farms Puffshrooms.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautopuff", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmpuffshrooms = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Teleport To Rares (!)",
+   Info = "Teleports To Tokens In Rare List.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautorares", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmrares = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Planters",
+   Info = "Will Replant Your Planters If They Hit 100%.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoplanters", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autoplanters = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Leaves",
+   Info = "Farms The Closest Leaves.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmclosestleaf = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Autofarm Tickets (!)",
+   Info = "Automatically Teleports To Tickets", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleassssutodeeededestorm", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+_G.Condition = State -- true turns it on, false turns it off
+while _G.Condition == true do
+if v.CFrame.YVector.Y == 1 then if v.Transparency == 0 then decal = v:FindFirstChildOfClass("Decal") if decal.Texture == '1674871631' or decal.Texture == "rbxassetid://1674871631" then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame break end end end end
+wait(5)
+   end,
+})
+
+local Tab = Window:CreateTab("Combat", 4483362458)
+
+local Toggle = Tab:CreateToggle({
+   Name = "Train Crab",
+   Info = "Kills Coconut Crab.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautolwsseaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+if State then api.humanoidrootpart().CFrame = CFrame.new(-307.52117919922, 107.91863250732, 467.86791992188) end
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Train Snail",
+   Info = "Kills Coconut Snail.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautosssxfvfleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+fd = game.Workspace.FlowerZones['Stump Field'] if State then api.humanoidrootpart().CFrame = CFrame.new(fd.Position.X, fd.Position.Y-6, fd.Position.Z) else api.humanoidrootpart().CFrame = CFrame.new(fd.Position.X, fd.Position.Y+2, fd.Position.Z) end
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Kill Mondo",
+   Info = "Kills Mondo Chick.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togdasgleautoleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.killmondo = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Kill Vicious",
+   Info = "Kills Vicious Bee.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoleasadfgdsf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.killvicious = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Kill Windy",
+   Info = "Kills Windy Bee.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautorsdtghvleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.killwindy = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Kill Mobs",
+   Info = "Automatically Field Hops And Kills Mobs.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleasddssdutoleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autokillmobs = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Avoid Mobs",
+   Info = "Avoids Mobs", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglasdxfcgveautoleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.avoidmobs = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Ant",
+   Info = "Automatically Does Ant Chellenge After Converting (YOU NEED SPARK STAFF)", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoleaf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autoant = State
+   end,
+})
+
+local Section = Tab:CreateSection("Auto Kill Mobs Settings")
+
+local Input = Tab:CreateInput({
+   Name = "Kill Mobs After x Convertions",
+   Info = "Default = 3", -- Speaks for itself, Remove if none.
+   PlaceholderText = "3",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 15, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+andromeda.vars.monstertimer = tonumber(Value)
+   end,
+})
+
+local Tab = Window:CreateTab("Dispensers", 4483362458)
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Dispensers",
+   Info = "Automatically Collects Dispensers.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autodispense = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Field Boosters",
+   Info = "Automatically Collects Field Boosters.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoboosters1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autoboosters = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Wealth Clock",
+   Info = "Automatically Collects Wealth Clock.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoclock1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.clock = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Free Ant Pass",
+   Info = "Automatically Collects Ant Passes.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoant1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.freeantpass = State
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Honeystorm",
+   Info = "Automatically Starts Honeystorm.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautostorm", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.honeystorm = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Summon Sprouts",
+   Info = "Automatically Uses The Sprout Summoner", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleassssutostorm", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+_G.Condition = State -- true turns it on, false turns it off
+while _G.Condition == true do
+game.ReplicatedStorage.Events.ToyEvent:FireServer("Sprout Summoner")
+wait(10)
+end
+   end,
+})
+
+
+local Section = Tab:CreateSection("Dispenser Settings")
+
+local Toggle = Tab:CreateToggle({
+   Name = "Royal Jelly Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.rj = not andromeda.dispensesettings.rj
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Blueberry Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.blub = not andromeda.dispensesettings.blub
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Strawberry Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.straw = not andromeda.dispensesettings.straw
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Treat Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers5", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.treat = not andromeda.dispensesettings.treat
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Coconut Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.coconut = not andromeda.dispensesettings.coconut
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Glue Dispenser",
+   Info = "Dispenser Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautodispensers7", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.glue = not andromeda.dispensesettings.glue
+   end,
+})
+
+local Section = Tab:CreateSection("Field Booster Settings")
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Mountain Top Booster",
+   Info = "Booster Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoboosters2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.white = not andromeda.dispensesettings.white
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Blue Field Booster",
+   Info = "Booster Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoboosters3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.blue = not andromeda.dispensesettings.blue
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Red Field Booster",
+   Info = "Booster Setting.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoboosters4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.dispensesettings.red = not andromeda.dispensesettings.red
+   end,
+})
+
+
+local Tab = Window:CreateTab("Quests", 4483362458)
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Accept / Confirm Quests",
+   Info = "Automatically Accepts And Confirms Quests.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoaccept", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autoquest = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Autofarm Quests",
+   Info = "Automatically Does Quests.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoaccept", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autodoquest = State
+   end,
+})
+
+local Section = Tab:CreateSection("Quest Settings")
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Npc Quests",
+   Options = {'All Quests', 'Bucko Bee', 'Brown Bear', 'Riley Bee', 'Polar Bear'},
+   CurrentOption = "All Quests",
+   Flag = "dwewdwewewewe", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+andromeda.vars.npcprefer = Option   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Teleports To Npc",
+   Info = "Instantly Teleports To The Npc.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggleautoaccepxssst", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.tptonpc = State
+   end,
+})
+
+local Tab = Window:CreateTab("Teleports", 4483362458)
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Fields",
+   Options = fieldstable,
+   CurrentOption = "Pick A Field",
+   Flag = "Dropdown2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").FlowerZones:FindFirstChild(Option).CFrame
+  -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Monsters",
+   Options = spawnerstable,
+   CurrentOption = "Pick A Monster",
+   Flag = "Dropdown3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+d = game:GetService("Workspace").MonsterSpawners:FindFirstChild(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z)
+  -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Toys Teleports",
+   Options = toystable,
+   CurrentOption = "Pick A Teleport",
+   Flag = "Dropdown4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+d = game:GetService("Workspace").Toys:FindFirstChild(Option).Platform game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z)
+  -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Button = Tab:CreateButton({
+   Name = "Teleport To Hive",
+   Info = "Teleports To Your Hive.", -- Speaks for itself, Remove if none.
+   Interact = 'Teleport',
+   Callback = function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Players").LocalPlayer.SpawnPos.Value
+   end,
+})
+
+local Tab = Window:CreateTab("Misc", 4483362458)
+
+local Section = Tab:CreateSection("Main")
+
+local Slider = Tab:CreateSlider({
+   Name = "Walkspeed",
+   Info = "Makes You Walk Faster", -- Speaks for itself, Remove if none.
+   Range = {0, 150},
+   Increment = 1,
+   Suffix = "Walk",
+   CurrentValue = 70,
+ Flag = "Slidedssddsdsdsr1",
+   Callback = function(Value)
+andromeda.vars.walkspeed = Value   -- The variable (Value) is a number which correlates to the value the slider is currently at
+   end,
+})
+
+
+local Slider = Tab:CreateSlider({
+   Name = "Jump Height",
+   Info = "Makes U Jump Higher", -- Speaks for itself, Remove if none.
+   Range = {0, 150},
+   Increment = 1,
+   Suffix = "Jump",
+   CurrentValue = 70,
+   Flag = "fsdfdsfdsfdsssdffdsfds", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+andromeda.vars.jumppower = Value   -- The variable (Value) is a number which correlates to the value the slider is currently at
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Godmode",
+   Info = "Makes You Invincible To Monsters.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggle1zxxzzxzxzx", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+ andromeda.toggles.godmode = State if State then bssapi:Godmode(true) else bssapi:Godmode(false) end   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+
+local Button = Tab:CreateButton({
+   Name = "Ants Challange Semi-Godmode",
+   Info = "Makes You Immune To Everything Except Lawnmowers And Fire.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+   -- The function that takes place when the button is pressed
+
+api.tween(1, CFrame.new(93.4228, 32.3983, 553.128)) task.wait(1) game.ReplicatedStorage.Events.ToyEvent:FireServer("Ant Challenge") game.Players.LocalPlayer.Character.HumanoidRootPart.Position = Vector3.new(93.4228, 42.3983, 553.128) task.wait(2) game.Players.LocalPlayer.Character.Humanoid.Name = 1 local l = game.Players.LocalPlayer.Character["1"]:Clone() l.Parent = game.Players.LocalPlayer.Character l.Name = "Humanoid" task.wait() game.Players.LocalPlayer.Character["1"]:Destroy() api.tween(1, CFrame.new(93.4228, 32.3983, 553.128)) task.wait(8) api.tween(1, CFrame.new(93.4228, 32.3983, 553.128))   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Equip Accesories",
+   Options = accesoriestable,
+   CurrentOption = "Normal",
+   Flag = "Droaccpdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2)   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Equip Masks",
+   Options = masktable,
+   CurrentOption = "Normal",
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+   -- The function that takes place when the selected option is changed
+local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2)
+   end,
+})
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Generate Amulet",
+   Options = {"Supreme Star Amulet", "Diamond Star Amulet", "Gold Star Amulet","Silver Star Amulet","Bronze Star Amulet","Moon Amulet"},
+   CurrentOption = "None",
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+local A_1 = Option.." Generator" local Event = game:GetService("ReplicatedStorage").Events.ToyEvent Event:FireServer(A_1)   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Button = Tab:CreateButton({
+   Name = "Export Stats Table",
+   Info = "Shows Ur Stats In Workspace", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+local StatCache = require(game.ReplicatedStorage.ClientStatCache)writefile("Stats_"..api.nickname..".json", StatCache:Encode())
+   end,
+})
+
+local Section = Tab:CreateSection("Extras")
+
+local Button = Tab:CreateButton({
+   Name = "Hide Nickname",
+   Info = "Hides Your Nickname", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/max0mind/lua/main/UTILITES/nicknamespoofer.lua"))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Destroy Decals",
+   Info = "Destroys Decals.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/max0mind/lua/main/UTILITES/destroydecals.lua"))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Boost FPS",
+   Info = "Makes Your Frames Per Second Higher.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/max0mind/lua/main/UTILITES/fpsboost.lua"))()
+   end,
+})
+
+local Input = Tab:CreateInput({
+   Name = "Gilder Float",
+   Info = "", -- Speaks for itself, Remove if none.
+   PlaceholderText = "0",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 15, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Speed = Value setupvalue(st, st[1]'Glider', glidersTable)   -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+local Input = Tab:CreateInput({
+   Name = "Gilder Speed",
+   Info = "", -- Speaks for itself, Remove if none.
+   PlaceholderText = "0",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 15, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Float = Value setupvalue(st, st[1]'Glider', glidersTable)   -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Ghost Mode",
+   Info = "Gives You Invisibility.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+ api.teleport(CFrame.new(0,0,0)) wait(1) if game.Players.LocalPlayer.Character:FindFirstChild('LowerTorso') then Root = game.Players.LocalPlayer.Character.LowerTorso.Root:Clone() game.Players.LocalPlayer.Character.LowerTorso.Root:Destroy() Root.Parent = game.Players.LocalPlayer.Character.LowerTorso api.teleport(game:GetService("Players").LocalPlayer.SpawnPos.Value) end
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Float",
+   Info = "Makes You Float", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togxssxssgle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+temptable.float = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Input = Tab:CreateInput({
+   Name = "Spoof Ping",
+   Info = "Spoofs Ping", -- Speaks for itself, Remove if none.
+   PlaceholderText = "0",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 15, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Option)
+settings():GetService("NetworkSettings").IncomingReplicationLag = tonumber(Option)/1000 or 0    -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+
+local Tab = Window:CreateTab("Settings", 4483362458)
+
+
+
+local Section = Tab:CreateSection("Autofarm")
+
+local Toggle = Tab:CreateToggle({
+   Name = "Dont Walk In Field",
+   Info = "Dont Walk In Field While Autofarming.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglewalkfield", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmflower = State
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Dont Farm Tokens",
+   Info = "Doesnt Collect Any Tokens.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglenotokens", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.donotfarmtokens = State
+   end,
+})
+
+
+local Section = Tab:CreateSection("Tokens")
+
+
+
+local Input = Tab:CreateInput({
+   Name = "Asset ID",
+   Info = "Put The Token's Asset Id That U Want To Be Added To Rares List", -- Speaks for itself, Remove if none.
+   PlaceholderText = "69696969",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 99, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+rarename = Value
+   -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+
+
+local Button = Tab:CreateButton({
+   Name = "Add Token To Rares List (SOON)",
+   Info = "Adds Token To Rares List.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+    table.insert(andromeda.rares, rarename)
+    game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Rares List D",true):Destroy()
+
+   end,
+})
+
+
+local Button = Tab:CreateButton({
+   Name = "Remove Token From Rares List (SOON)",
+   Info = "Removes Token From Rares.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+    table.remove(andromeda.rares, api.tablefind(andromeda.rares, rarename))
+    game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Rares List D",true):Destroy()
+
+   end,
+})
+
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Rares List",
+   Options = andromeda.rares,
+   CurrentOption = "Basic Egg",
+   Flag = "Dropdownrareslist", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+   -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+local Section = Tab:CreateSection("Priority Tokens (Autofarm)")
+
+local Input = Tab:CreateInput({
+   Name = "Asset ID",
+   Info = "Put The Token's Asset Id That U Want To Be Added To Priority Tokens.", -- Speaks for itself, Remove if none.
+   PlaceholderText = "69696969",
+   NumbersOnly = true, -- If the user can only type numbers.
+   CharacterLimit = 99, --max character limit. Remove if none.
+   OnEnter = false, -- Will callback only if the user pressed ENTER while being focused.
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Value)
+rarename = Value
+   -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Add Token To Priority Autofarm (SOON)",
+   Info = "Adds Token To Rares List.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+    table.insert(andromeda.rares, rarename)
+    game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Rares List D",true):Destroy()
+
+   end,
+})
+
+
+local Button = Tab:CreateButton({
+   Name = "Remove Token From Priority Autofarm (SOON)",
+   Info = "Removes Token From Rares.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+    table.remove(andromeda.rares, api.tablefind(andromeda.rares, rarename))
+    game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Rares List D",true):Destroy()
+
+   end,
+})
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Rares List",
+   Options = andromeda.priority,
+   CurrentOption = "Focus",
+   Flag = "Dropdownraxxx", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+   -- The function that takes place when the selected option is changed
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Section = Tab:CreateSection("Field Settings")
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Best White Field",
+   Options = temptable.whitefields,
+   CurrentOption = "Coconut Field",
+   Flag = "Dropdownbwf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+andromeda.bestfields.white = Option   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Best Red Field",
+   Options = temptable.redfields,
+   CurrentOption = "Pepper Patch",
+   Flag = "Dropdownbrf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+andromeda.bestfields.red = Option   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Best Blue Field",
+   Options = temptable.bluefields,
+   CurrentOption = "Stump Field",
+   Flag = "Dropdownbbf", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+andromeda.bestfields.blue = Option   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+local Section = Tab:CreateSection("Blacklist Fields")
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Field",
+   Options = fieldstable,
+   CurrentOption = "Please Pick A Field",
+   Flag = "Dropdownblacklist888", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+temptable.blackfield = Option   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Add Field To Blacklist (SOON)",
+   Info = "Adds Field To Rares List.", -- Speaks for itself, Remove if none.
+   Interact = 'Changeable',
+   Callback = function()
+table.insert(andromeda.blacklistedfields, temptable.blackfield) game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Blacklisted Fields D",true):Destroy() fieldsettings:CreateDropdown("Blacklisted Fields", andromeda.blacklistedfields, function(Option) end) 
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Add Token To Rares List (SOON)",
+   Info = "Removes Field From Rares List.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+
+   end,
+})
+
+
+
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Blacklisted Fields",
+   Options = andromeda.blacklistedfields,
+   CurrentOption = ".",
+   Flag = "Dropdownblacklist", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+   -- The variable (Option) is a string for the value that the dropdown was changed to
+   end,
+})
+
+
+local Tab = Window:CreateTab("Beesmas", 4483362458)
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Gingerbread Bears",
+   Info = "Beesmas Feature", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggveefele1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+ andromeda.toggles.collectgingerbreads = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Samovar",
+   Info = "Beesmas Feature", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglesdrgffrde1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autosamovar = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Stockings",
+   Info = "Beesmas Feature", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglggfggssgse1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autostockings = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Candles",
+   Info = "Beesmas Feature.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "asdfgdgdsgd", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autocandles = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Beesmas Feast",
+   Info = "Beesmas Feature", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggsadfsasdfdsale1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autofeast = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Onett Lid Art",
+   Info = "Beesmas Feature.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Toggldasassadse1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.autoonettart = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+local Toggle = Tab:CreateToggle({
+   Name = "Farm Snowflakes (!)",
+   Info = "Teleports To Snowflakes.", -- Speaks for itself, Remove if none.
+   CurrentValue = false,
+   Flag = "Togglesdffdssffsdfsd1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(State)
+andromeda.toggles.farmsnowflakes = State   -- The variable (Value) is a boolean on whether the toggle is true or false
+   end,
+})
+
+
+
+Rayfield:LoadConfiguration()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+task.spawn(function() while task.wait() do
+    if andromeda.toggles.autofarm then
+        if andromeda.toggles.farmcoco then getcoco() end
+        if andromeda.toggles.collectcrosshairs then getcrosshairs() end
+        if andromeda.toggles.farmflame then getflame() end
+        if andromeda.toggles.farmfuzzy then getfuzzy() end
+    end
+end end)
+
+game.Workspace.Particles.ChildAdded:Connect(function(v)
+    if not temptable.started.vicious and not temptable.started.ant then
+        if v.Name == "WarningDisk" and not temptable.started.vicious and andromeda.toggles.autofarm and not temptable.started.ant and andromeda.toggles.farmcoco and (v.Position-api.humanoidrootpart().Position).magnitude < temptable.magnitude and not temptable.converting then
+            table.insert(temptable.coconuts, v)
+            getcoco(v)
+            gettoken()
+        elseif v.Name == "Crosshair" and v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position-api.humanoidrootpart().Position).magnitude < temptable.magnitude and andromeda.toggles.autofarm and andromeda.toggles.collectcrosshairs and not temptable.converting then
+            if #temptable.crosshairs <= 3 then
+                table.insert(temptable.crosshairs, v)
+                getcrosshairs(v)
+                gettoken()
+            end
+        end
+    end
+end)
+
+task.spawn(function() while task.wait() do
+    if andromeda.toggles.autofarm then
+        temptable.magnitude = 70
+        if game.Players.LocalPlayer.Character:FindFirstChild("ProgressLabel",true) then
+        local pollenprglbl = game.Players.LocalPlayer.Character:FindFirstChild("ProgressLabel",true)
+        maxpollen = tonumber(pollenprglbl.Text:match("%d+$"))
+        local pollencount = game.Players.LocalPlayer.CoreStats.Pollen.Value
+        pollenpercentage = pollencount/maxpollen*100
+        fieldselected = game:GetService("Workspace").FlowerZones[andromeda.vars.field]
+        if andromeda.toggles.autodoquest and game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests.Content:FindFirstChild("Frame") then
+            for i,v in next, game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests:GetDescendants() do
+                if v.Name == "Description" then
+                    if string.match(v.Parent.Parent.TitleBar.Text, andromeda.vars.npcprefer) or andromeda.vars.npcprefer == "All Quests" and not string.find(v.Text, "Puffshroom") then
+                        pollentypes = {'White Pollen', "Red Pollen", "Blue Pollen", "Blue Flowers", "Red Flowers", "White Flowers"}
+                        text = v.Text
+                        if api.returnvalue(fieldstable, text) and not string.find(v.Text, "Complete!") and not api.findvalue(andromeda.blacklistedfields, api.returnvalue(fieldstable, text)) then
+                            d = api.returnvalue(fieldstable, text)
+                            fieldselected = game:GetService("Workspace").FlowerZones[d]
+                            break
+                        elseif api.returnvalue(pollentypes, text) and not string.find(v.Text, 'Complete!') then
+                            d = api.returnvalue(pollentypes, text)
+                            if d == "Blue Flowers" or d == "Blue Pollen" then
+                                fieldselected = game:GetService("Workspace").FlowerZones[andromeda.bestfields.blue]
+                                break
+                            elseif d == "White Flowers" or d == "White Pollen" then
+                                fieldselected = game:GetService("Workspace").FlowerZones[andromeda.bestfields.white]
+                                break
+                            elseif d == "Red Flowers" or d == "Red Pollen" then
+                                fieldselected = game:GetService("Workspace").FlowerZones[andromeda.bestfields.red]
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            fieldselected = game:GetService("Workspace").FlowerZones[andromeda.vars.field]
+        end
+        fieldpos = CFrame.new(fieldselected.Position.X, fieldselected.Position.Y+3, fieldselected.Position.Z)
+        fieldposition = fieldselected.Position
+        if temptable.sprouts.detected and temptable.sprouts.coords and andromeda.toggles.farmsprouts then
+            fieldposition = temptable.sprouts.coords.Position
+            fieldpos = temptable.sprouts.coords
+        end
+        if andromeda.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then 
+            if api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms) then
+                temptable.magnitude = 25 
+                fieldpos = api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                fieldposition = fieldpos.Position
+            elseif api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms) then
+                temptable.magnitude = 25 
+                fieldpos = api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                fieldposition = fieldpos.Position
+            elseif api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms) then
+                temptable.magnitude = 25 
+                fieldpos = api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                fieldposition = fieldpos.Position
+            elseif api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms) then
+                temptable.magnitude = 25 
+                fieldpos = api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                fieldposition = fieldpos.Position
+            else
+                temptable.magnitude = 25 
+                fieldpos = api.getbiggestmodel(game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                fieldposition = fieldpos.Position
+            end
+        end
+        if tonumber(pollenpercentage) < tonumber(andromeda.vars.convertat) then
+            if not temptable.tokensfarm then
+                api.tween(2, fieldpos)
+                task.wait(2)
+                temptable.tokensfarm = true
+                if andromeda.toggles.autosprinkler then makesprinklers() end
+            else
+                if andromeda.toggles.killmondo then
+                    while andromeda.toggles.killmondo and game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") and not temptable.started.vicious and not temptable.started.monsters do
+                        temptable.started.mondo = true
+                        while game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") do
+                            disableall()
+                            game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false 
+                            mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
+                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
+                            task.wait(1)
+                            temptable.float = true
+                        end
+                        task.wait(.5) game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = true temptable.float = false api.tween(.5, CFrame.new(73.2, 176.35, -167)) task.wait(1)
+                        for i = 0, 50 do 
+                            gettoken(CFrame.new(73.2, 176.35, -167).Position) 
+                        end 
+                        enableall() 
+                        api.tween(2, fieldpos) 
+                        temptable.started.mondo = false
+                    end
+                end
+                if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
+                    api.tween(2, fieldpos)
+                    task.wait(2)
+                    if andromeda.toggles.autosprinkler then makesprinklers() end
+                end
+                getprioritytokens()
+                if andromeda.toggles.avoidmobs then avoidmob() end
+                if andromeda.toggles.farmclosestleaf then closestleaf() end
+                if andromeda.toggles.farmbubbles then getbubble() end
+                if andromeda.toggles.farmclouds then getcloud() end
+                if andromeda.toggles.farmunderballoons then getballoons() end
+                if not andromeda.toggles.donotfarmtokens and done then gettoken() end
+                if not andromeda.toggles.farmflower then getflower() end
+            end
+        elseif tonumber(pollenpercentage) >= tonumber(andromeda.vars.convertat) then
+            temptable.tokensfarm = false
+            api.tween(2, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
+            task.wait(2)
+            temptable.converting = true
+            repeat
+                converthoney()
+            until game.Players.LocalPlayer.CoreStats.Pollen.Value == 0
+            if andromeda.toggles.convertballoons and gethiveballoon() then
+                task.wait(6)
+                repeat
+                    task.wait()
+                    converthoney()
+                until gethiveballoon() == false or not andromeda.toggles.convertballoons
+            end
+            temptable.converting = false
+            temptable.act = temptable.act + 1
+            task.wait(6)
+            if andromeda.toggles.autoant and not game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value and rtsg().Eggs.AntPass > 0 then farmant() end
+            if andromeda.toggles.autoquest then makequests() end
+            if andromeda.toggles.autoplanters then collectplanters() end
+            if andromeda.toggles.autokillmobs then 
+                if temptable.act >= andromeda.vars.monstertimer then
+                    temptable.started.monsters = true
+                    temptable.act = 0
+                    killmobs() 
+                    temptable.started.monsters = false
+                end
+            end
+        end
+    end
+end end end)
+
+task.spawn(function()
+    while task.wait(1) do
+		if andromeda.toggles.killvicious and temptable.detected.vicious and temptable.converting == false and not temptable.started.monsters then
+            temptable.started.vicious = true
+            disableall()
+			local vichumanoid = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+			for i,v in next, game.workspace.Particles:GetChildren() do
+				for x in string.gmatch(v.Name, "Vicious") do
+					if string.find(v.Name, "Vicious") then
+						api.tween(1,CFrame.new(v.Position.x, v.Position.y, v.Position.z)) task.wait(1)
+						api.tween(0.5, CFrame.new(v.Position.x, v.Position.y, v.Position.z)) task.wait(.5)
+					end
+				end
+			end
+			for i,v in next, game.workspace.Particles:GetChildren() do
+				for x in string.gmatch(v.Name, "Vicious") do
+                    while andromeda.toggles.killvicious and temptable.detected.vicious do task.wait() if string.find(v.Name, "Vicious") then
+                        for i=1, 4 do temptable.float = true vichumanoid.CFrame = CFrame.new(v.Position.x+10, v.Position.y, v.Position.z) task.wait(.3)
+                        end
+                    end end
+                end
+			end
+            enableall()
+			task.wait(1)
+			temptable.float = false
+            temptable.started.vicious = false
+		end
+	end
+end)
+
+task.spawn(function() while task.wait() do
+    if andromeda.toggles.killwindy and temptable.detected.windy and not temptable.converting and not temptable.started.vicious and not temptable.started.mondo and not temptable.started.monsters then
+        temptable.started.windy = true
+        wlvl = "" aw = false awb = false -- some variable for autowindy, yk?
+        disableall()
+        while andromeda.toggles.killwindy and temptable.detected.windy do
+            if not aw then
+                for i,v in pairs(workspace.Monsters:GetChildren()) do
+                    if string.find(v.Name, "Windy") then wlvl = v.Name aw = true -- we found windy!
+                    end
+                end
+            end
+            if aw then
+                for i,v in pairs(workspace.Monsters:GetChildren()) do
+                    if string.find(v.Name, "Windy") then
+                        if v.Name ~= wlvl then
+                            temptable.float = false task.wait(5) for i =1, 5 do gettoken(api.humanoidrootpart().Position) end -- collect tokens :yessir:
+                            wlvl = v.Name
+                        end
+                    end
+                end
+            end
+            if not awb then api.tween(1,temptable.gacf(temptable.windy, 5)) task.wait(1) awb = true end
+            if awb and temptable.windy.Name == "Windy" then
+                api.humanoidrootpart().CFrame = temptable.gacf(temptable.windy, 25) temptable.float = true task.wait()
+            end
+        end 
+        enableall()
+        temptable.float = false
+        temptable.started.windy = false
+    end
+end end)
+
+task.spawn(function() while task.wait(0.001) do
+    if andromeda.toggles.traincrab then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-259, 111.8, 496.4) * CFrame.fromEulerAnglesXYZ(0, 110, 90) temptable.float = true temptable.float = false end
+    if andromeda.toggles.farmrares then for k,v in next, game.workspace.Collectibles:GetChildren() do if v.CFrame.YVector.Y == 1 then if v.Transparency == 0 then decal = v:FindFirstChildOfClass("Decal") for e,r in next, andromeda.rares do if decal.Texture == r or decal.Texture == "rbxassetid://"..r then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame break end end end end end end
+    if andromeda.toggles.autodig then workspace.NPCs.Onett.Onett["Porcelain Dipper"].ClickEvent:FireServer() if game.Players.LocalPlayer then if game.Players.LocalPlayer.Character then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) then clickevent = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) or nil end end end if clickevent then clickevent:FireServer() end end end
+end end)
+
+game:GetService("Workspace").Particles.Folder2.ChildAdded:Connect(function(child)
+    if child.Name == "Sprout" then
+        temptable.sprouts.detected = true
+        temptable.sprouts.coords = child.CFrame
+    end
+end)
+game:GetService("Workspace").Particles.Folder2.ChildRemoved:Connect(function(child)
+    if child.Name == "Sprout" then
+        task.wait(30)
+        temptable.sprouts.detected = false
+        temptable.sprouts.coords = ""
+    end
+end)
+
+Workspace.Particles.ChildAdded:Connect(function(instance)
+    if string.find(instance.Name, "Vicious") then
+        temptable.detected.vicious = true
+    end
+end)
+Workspace.Particles.ChildRemoved:Connect(function(instance)
+    if string.find(instance.Name, "Vicious") then
+        temptable.detected.vicious = false
+    end
+end)
+game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
+    if v.Name == "Windy" then
+        task.wait(3) temptable.windy = v temptable.detected.windy = true
+    end
+end)
+game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
+    if v.Name == "Windy" then
+        task.wait(3) temptable.windy = nil temptable.detected.windy = false
+    end
+end)
+
+task.spawn(function() while task.wait(.1) do
+    if not temptable.converting then
+        if andromeda.toggles.autosamovar then
+            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Samovar")
+            platformm = game:GetService("Workspace").Toys.Samovar.Platform
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
+        if andromeda.toggles.autostockings then
+            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Stockings")
+            platformm = game:GetService("Workspace").Toys.Stockings.Platform
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
+        if andromeda.toggles.autoonettart then
+            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Onett's Lid Art")
+            platformm = game:GetService("Workspace").Toys["Onett's Lid Art"].Platform
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
+        if andromeda.toggles.autocandles then
+            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Honeyday Candles")
+            platformm = game:GetService("Workspace").Toys["Honeyday Candles"].Platform
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
+        if andromeda.toggles.autofeast then
+            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Beesmas Feast")
+            platformm = game:GetService("Workspace").Toys["Beesmas Feast"].Platform
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
+    end
+end end)
+
+task.spawn(function() while task.wait(1) do
+    temptable.runningfor = temptable.runningfor + 1
+    temptable.honeycurrent = statsget().Totals.Honey
+    if andromeda.toggles.honeystorm then game.ReplicatedStorage.Events.ToyEvent:FireServer("Honeystorm") end
+    if andromeda.toggles.collectgingerbreads then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Gingerbread House") end
+    if andromeda.toggles.autodispense then
+        if andromeda.dispensesettings.rj then local A_1 = "Free Royal Jelly Dispenser" local Event = game:GetService("ReplicatedStorage").Events.ToyEvent Event:FireServer(A_1) end
+        if andromeda.dispensesettings.blub then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Blueberry Dispenser") end
+        if andromeda.dispensesettings.straw then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Strawberry Dispenser") end
+        if andromeda.dispensesettings.treat then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Treat Dispenser") end
+        if andromeda.dispensesettings.coconut then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Coconut Dispenser") end
+        if andromeda.dispensesettings.glue then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Glue Dispenser") end
+    end
+    if andromeda.toggles.autoboosters then 
+        if andromeda.dispensesettings.white then game.ReplicatedStorage.Events.ToyEvent:FireServer("Field Booster") end
+        if andromeda.dispensesettings.red then game.ReplicatedStorage.Events.ToyEvent:FireServer("Red Field Booster") end
+        if andromeda.dispensesettings.blue then game.ReplicatedStorage.Events.ToyEvent:FireServer("Blue Field Booster") end
+    end
+    if andromeda.toggles.clock then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Wealth Clock") end
+    if andromeda.toggles.freeantpass then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Free Ant Pass Dispenser") end
+    gainedhoneylabel:Set("Gained Honey: "..api.suffixstring(temptable.honeycurrent - temptable.honeystart))
+end end)
+
+game:GetService('RunService').Heartbeat:connect(function() 
+    if andromeda.toggles.autoquest then firesignal(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.NPC.ButtonOverlay.MouseButton1Click) end
+    if andromeda.toggles.loopspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = andromeda.vars.walkspeed end
+    if andromeda.toggles.loopjump then game.Players.LocalPlayer.Character.Humanoid.JumpPower = andromeda.vars.jumppower end
+end)
+
+game:GetService('RunService').Heartbeat:connect(function()
+    for i,v in next, game.Players.LocalPlayer.PlayerGui.ScreenGui:WaitForChild("MinigameLayer"):GetChildren() do for k,q in next, v:WaitForChild("GuiGrid"):GetDescendants() do if q.Name == "ObjContent" or q.Name == "ObjImage" then q.Visible = true end end end
+end)
+
+game:GetService('RunService').Heartbeat:connect(function() 
+    if temptable.float then game.Players.LocalPlayer.Character.Humanoid.BodyTypeScale.Value = 0 floatpad.CanCollide = true floatpad.CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X, game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y-3.75, game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z) task.wait(0)  else floatpad.CanCollide = false end
+end)
+
+local vu = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:connect(function() vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)task.wait(1)vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+
+task.spawn(function()while task.wait() do
+    if andromeda.toggles.farmsnowflakes then
+        task.wait(3)
+        for i,v in next, temptable.tokenpath:GetChildren() do
+            if v:FindFirstChildOfClass("Decal") and v:FindFirstChildOfClass("Decal").Texture == "rbxassetid://6087969886" and v.Transparency == 0 then
+                api.humanoidrootpart().CFrame = CFrame.new(v.Position.X, v.Position.Y+3, v.Position.Z)
+                break
+            end
+        end
+    end
+end end)
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    humanoid = char:WaitForChild("Humanoid")
+    humanoid.Died:Connect(function()
+        if andromeda.toggles.autofarm then
+            temptable.dead = true
+            andromeda.toggles.autofarm = false
+            temptable.converting = false
+            temptable.farmtoken = false
+        end
+        if temptable.dead then
+            task.wait(25)
+            temptable.dead = false
+            andromeda.toggles.autofarm = true local player = game.Players.LocalPlayer
+            temptable.converting = false
+            temptable.tokensfarm = true
+        end
+    end)
+end)
+
+for _,v in next, game.workspace.Collectibles:GetChildren() do
+    if string.find(v.Name,"") then
+        v:Destroy()
+    end
+end 
+
+task.spawn(function() while task.wait() do
+    pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    task.wait(0.00001)
+    currentSpeed = (pos-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+    if currentSpeed > 0 then
+        temptable.running = true
+    else
+        temptable.running = false
+    end
+end end)
+
+hives = game.Workspace.Honeycombs:GetChildren() for i = #hives, 1, -1 do  v = game.Workspace.Honeycombs:GetChildren()[i] if v.Owner.Value == nil then game.ReplicatedStorage.Events.ClaimHive:FireServer(v.HiveID.Value) end end
+if _G.autoload then if isfile("andromeda/BSS_".._G.autoload..".json") then andromeda = game:service'HttpService':JSONDecode(readfile("andromeda/BSS_".._G.autoload..".json")) end end
+for _, part in next, workspace:FindFirstChild("FieldDecos"):GetDescendants() do if part:IsA("BasePart") then part.CanCollide = false part.Transparency = part.Transparency < 0.5 and 0.5 or part.Transparency task.wait() end end
+for _, part in next, workspace:FindFirstChild("Decorations"):GetDescendants() do if part:IsA("BasePart") and (part.Parent.Name == "Bush" or part.Parent.Name == "Blue Flower") then part.CanCollide = false part.Transparency = part.Transparency < 0.5 and 0.5 or part.Transparency task.wait() end end
+for i,v in next, workspace.Decorations.Misc:GetDescendants() do if v.Parent.Name == "Mushroom" then v.CanCollide = false v.Transparency = 0.5 end end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
