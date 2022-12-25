@@ -1437,7 +1437,7 @@ local Toggle = Tab:CreateToggle({
 
 
 local Button = Tab:CreateButton({
-   Name = "Ants Challange Semi-Godmode",
+   Name = "Ant Challange Semi-Godmode",
    Info = "Makes You Immune To Everything Except Lawnmowers And Fire.", -- Speaks for itself, Remove if none.
    Interact = 'Changable',
    Callback = function()
