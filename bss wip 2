@@ -1294,6 +1294,7 @@ andromeda.dispensesettings.red = not andromeda.dispensesettings.red
 
 
 local Tab = Window:CreateTab("Quests", 4483362458)
+local Section = Tab:CreateSection("Make Sure To Have The Quest Menu Open!")
 
 local Toggle = Tab:CreateToggle({
    Name = "Auto Accept / Confirm Quests",
@@ -1308,7 +1309,7 @@ andromeda.toggles.autoquest = State
 
 local Toggle = Tab:CreateToggle({
    Name = "Autofarm Quests",
-   Info = "Automatically Does Quests.", -- Speaks for itself, Remove if none.
+   Info = "Automatically Does Quests. Make Sure To Have The Quest Menu Open.", -- Speaks for itself, Remove if none.
    CurrentValue = false,
    Flag = "Toggleautoaccept", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(State)
