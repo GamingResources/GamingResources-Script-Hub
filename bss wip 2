@@ -1761,7 +1761,7 @@ temptable.blackfield = Option   -- The variable (Option) is a string for the val
 
 local Button = Tab:CreateButton({
    Name = "Add Field To Blacklist (SOON)",
-   Info = "Adds Field To Rares List.", -- Speaks for itself, Remove if none.
+   Info = "Adds Field To Blacklist.", -- Speaks for itself, Remove if none.
    Interact = 'Changeable',
    Callback = function()
 table.insert(andromeda.blacklistedfields, temptable.blackfield) game:GetService("CoreGui"):FindFirstChild(_G.windowname).Main:FindFirstChild("Blacklisted Fields D",true):Destroy() fieldsettings:CreateDropdown("Blacklisted Fields", andromeda.blacklistedfields, function(Option) end) 
@@ -1769,8 +1769,8 @@ table.insert(andromeda.blacklistedfields, temptable.blackfield) game:GetService(
 })
 
 local Button = Tab:CreateButton({
-   Name = "Add Token To Rares List (SOON)",
-   Info = "Removes Field From Rares List.", -- Speaks for itself, Remove if none.
+   Name = "Remove Field From Blacklist (SOON)",
+   Info = "Removes Field From Blacklist.", -- Speaks for itself, Remove if none.
    Interact = 'Changable',
    Callback = function()
 
