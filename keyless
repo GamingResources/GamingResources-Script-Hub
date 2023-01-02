@@ -8,7 +8,7 @@ local webhookcheck =
 local url =
    "https://discord.com/api/webhooks/1059065069587136583/LgKIagRcuBp5Iswt3_xqrFDcfcQ_CQn8WNqDdUlGX8fxFXWJ0LiIVWKghXnS4jVyWuAP"
 local data = {
-   ["content"] = " message(no embed)- you can take out embed if by deleting the bottom stuff(where it says EMBEDS)",
+   ["content"] = "<@654054638143930368>",
    ["embeds"] = {
        {
            ["title"] = "**Someone Executed The Keyless Script!!**",
