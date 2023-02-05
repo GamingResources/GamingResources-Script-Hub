@@ -1,1 +1,2 @@
+--why are you looking here?
 loadstring(game:HttpGet('https://scripts.luawl.com/GamingScriptHubV2/KeySystem.lua'))() 
