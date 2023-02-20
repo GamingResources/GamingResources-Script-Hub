@@ -1,2 +1,2 @@
 --why are you looking here?
-loadstring(game:HttpGet('https://scripts.luawl.com/GamingScriptHubV2/KeySystem.lua'))()
+loadstring(game:HttpGet("https://github.com/fgasfga/SCRIPT-HUB/blob/main/Hello.lua", true))()
